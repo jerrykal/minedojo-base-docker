@@ -25,7 +25,7 @@ ENV PASSWD mypasswd
 ENV NOVNC_ENABLE false
 ENV WEBRTC_ENCODER nvh264enc
 ENV WEBRTC_ENABLE_RESIZE false
-ENV ENABLE_AUDIO true
+ENV ENABLE_AUDIO false
 ENV ENABLE_BASIC_AUTH true
 
 # Temporary fix for NVIDIA container repository
@@ -101,7 +101,6 @@ RUN dpkg --add-architecture i386 && \
         parole \
         policykit-desktop-privileges \
         libpulse0 \
-        pulseaudio \
         pavucontrol \
         ristretto \
         supervisor \
@@ -155,7 +154,6 @@ RUN dpkg --add-architecture i386 && \
         xfce4-netload-plugin \
         xfce4-notes-plugin \
         xfce4-places-plugin \
-        xfce4-pulseaudio-plugin \
         xfce4-sensors-plugin \
         xfce4-smartbookmark-plugin \
         xfce4-statusnotifier-plugin \
@@ -185,21 +183,21 @@ RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then apt-get update && apt-get install
 }" > /etc/vulkan/icd.d/nvidia_icd.json
 
 # Wine, Winetricks, and PlayOnLinux, comment out the below lines to disable
-ARG WINE_BRANCH=devel
-RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then add-apt-repository ppa:cybermax-dexter/sdl2-backport; fi && \
-    curl -fsSL -o /usr/share/keyrings/winehq-archive.key "https://dl.winehq.org/wine-builds/winehq.key" && \
-    curl -fsSL -o "/etc/apt/sources.list.d/winehq-$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2).sources" "https://dl.winehq.org/wine-builds/ubuntu/dists/$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2)/winehq-$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2).sources" && \
-    add-apt-repository ppa:lutris-team/lutris && \
-    apt-get update && apt-get install --install-recommends -y \
-        winehq-${WINE_BRANCH} && \
-    apt-get update && apt-get install --no-install-recommends -y \
-        lutris \
-        q4wine \
-        playonlinux && \
-    rm -rf /var/lib/apt/lists/* && \
-    curl -fsSL -o /usr/bin/winetricks "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" && \
-    chmod 755 /usr/bin/winetricks && \
-    curl -fsSL -o /usr/share/bash-completion/completions/winetricks "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion"
+#ARG WINE_BRANCH=devel
+#RUN if [ "${UBUNTU_RELEASE}" = "18.04" ]; then add-apt-repository ppa:cybermax-dexter/sdl2-backport; fi && \
+#    curl -fsSL -o /usr/share/keyrings/winehq-archive.key "https://dl.winehq.org/wine-builds/winehq.key" && \
+#    curl -fsSL -o "/etc/apt/sources.list.d/winehq-$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2).sources" "https://dl.winehq.org/wine-builds/ubuntu/dists/$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2)/winehq-$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2).sources" && \
+#    add-apt-repository ppa:lutris-team/lutris && \
+#    apt-get update && apt-get install --install-recommends -y \
+#        winehq-${WINE_BRANCH} && \
+#    apt-get update && apt-get install --no-install-recommends -y \
+#        lutris \
+#        q4wine \
+#        playonlinux && \
+#    rm -rf /var/lib/apt/lists/* && \
+#    curl -fsSL -o /usr/bin/winetricks "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" && \
+#    chmod 755 /usr/bin/winetricks && \
+#    curl -fsSL -o /usr/share/bash-completion/completions/winetricks "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion"
 
 # Install VirtualGL
 RUN VIRTUALGL_VERSION=$(curl -fsSL "https://api.github.com/repos/VirtualGL/virtualgl/releases/67016359" | jq -r '.tag_name' | sed 's/[^0-9\.\-]*//g') && \
@@ -239,23 +237,20 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
         libsrtp2-1 \
         libxdamage1 \
         libxml2-dev \
-        libwebrtc-audio-processing1 \
         libcairo-gobject2 \
-        pulseaudio \
         libpulse0 \
         libpangocairo-1.0-0 \
         libgirepository1.0-dev \
         libjpeg-dev \
         zlib1g-dev \
         x264 && \
-    rm -rf /var/lib/apt/lists/* && \
-    cd /opt && \
-    SELKIES_VERSION=$(curl -fsSL "https://api.github.com/repos/selkies-project/selkies-gstreamer/releases/latest" | jq -r '.tag_name' | sed 's/[^0-9\.\-]*//g') && \
-    curl -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies-gstreamer-v${SELKIES_VERSION}-ubuntu${UBUNTU_RELEASE}.tgz" | tar -zxf - && \
-    curl -O -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies_gstreamer-${SELKIES_VERSION}-py3-none-any.whl" && pip3 install "selkies_gstreamer-${SELKIES_VERSION}-py3-none-any.whl" && rm -f "selkies_gstreamer-${SELKIES_VERSION}-py3-none-any.whl" && \
-    pip3 install -e "git+https://github.com/selkies-project/python-xlib.git@add-xfixes-cursor#egg=python-xlib" && \
-    curl -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies-gstreamer-web-v${SELKIES_VERSION}.tgz" | tar -zxf - && \
-    cd /usr/local/cuda/lib64 && sudo find . -maxdepth 1 -type l -name "*libnvrtc.so.*" -exec sh -c 'ln -sf $(basename {}) libnvrtc.so' \;
+    rm -rf /var/lib/apt/lists/*
+    #SELKIES_VERSION=$(curl -fsSL "https://api.github.com/repos/selkies-project/selkies-gstreamer/releases/latest" | jq -r '.tag_name' | sed 's/[^0-9\.\-]*//g') && \
+    #curl -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies-gstreamer-v${SELKIES_VERSION}-ubuntu${UBUNTU_RELEASE}.tgz" | tar -zxf - && \
+    #curl -O -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies_gstreamer-${SELKIES_VERSION}-py3-none-any.whl" && pip3 install "selkies_gstreamer-${SELKIES_VERSION}-py3-none-any.whl" && rm -f "selkies_gstreamer-${SELKIES_VERSION}-py3-none-any.whl" && \
+    #pip3 install -e "git+https://github.com/selkies-project/python-xlib.git@add-xfixes-cursor#egg=python-xlib" && \
+    #curl -fsSL "https://github.com/selkies-project/selkies-gstreamer/releases/download/v${SELKIES_VERSION}/selkies-gstreamer-web-v${SELKIES_VERSION}.tgz" | tar -zxf - && \
+    #cd /usr/local/cuda/lib64 && sudo find . -maxdepth 1 -type l -name "*libnvrtc.so.*" -exec sh -c 'ln -sf $(basename {}) libnvrtc.so' \;
 
 # Install latest noVNC web interface for fallback
 RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -300,7 +295,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     rm -rf /var/lib/apt/lists/* && \
     groupadd -g 1000 user && \
     useradd -ms /bin/bash user -u 1000 -g 1000 && \
-    usermod -a -G adm,audio,cdrom,dialout,dip,fax,floppy,input,lp,lpadmin,plugdev,scanner,sudo,tape,tty,video,voice user && \
+    usermod -a -G adm,cdrom,dialout,dip,fax,floppy,input,lp,lpadmin,plugdev,sudo,tape,tty,video,voice user && \
     echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     chown user:user /home/user && \
     echo "user:${PASSWD}" | chpasswd && \
@@ -308,10 +303,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 COPY entrypoint.sh /etc/entrypoint.sh
 RUN chmod 755 /etc/entrypoint.sh
-COPY selkies-gstreamer-entrypoint.sh /etc/selkies-gstreamer-entrypoint.sh
-RUN chmod 755 /etc/selkies-gstreamer-entrypoint.sh
-COPY supervisord.conf /etc/supervisord.conf
-RUN chmod 755 /etc/supervisord.conf
+#COPY selkies-gstreamer-entrypoint.sh /etc/selkies-gstreamer-entrypoint.sh
+#RUN chmod 755 /etc/selkies-gstreamer-entrypoint.sh
+#COPY supervisord.conf /etc/supervisord.conf
+#RUN chmod 755 /etc/supervisord.conf
 
 EXPOSE 8080
 
@@ -319,4 +314,10 @@ USER user
 ENV USER=user
 WORKDIR /home/user
 
-ENTRYPOINT ["/usr/bin/supervisord"]
+ENV DISPLAY :0
+ENV VGL_REFRESHRATE 60
+ENV VGL_ISACTIVE 1
+ENV VGL_DISPLAY egl
+ENV VGL_WM 1
+
+ENTRYPOINT ["/etc/entrypoint.sh"]
