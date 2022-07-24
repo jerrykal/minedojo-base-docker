@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-#trap "echo TRAPed signal" HUP INT QUIT KILL TERM
-
 sudo chown user:user /home/user
 echo "user:$PASSWD" | sudo chpasswd
 sudo rm -rf /tmp/.X*
@@ -10,7 +8,6 @@ export PATH="${PATH}:/opt/VirtualGL/bin"
 export LD_LIBRARY_PATH="/usr/lib/libreoffice/program:${LD_LIBRARY_PATH}"
 
 sudo /etc/init.d/dbus start
-#source /opt/gstreamer/gst-env
 
 export DISPLAY=":0"
 Xvfb "${DISPLAY}" -ac -screen "0" "8192x4096x${CDEPTH}" -dpi "${DPI}" +extension "RANDR" +extension "GLX" +iglx +extension "MIT-SHM" +render -nolisten "tcp" -noreset -shmem &
@@ -19,8 +16,6 @@ Xvfb "${DISPLAY}" -ac -screen "0" "8192x4096x${CDEPTH}" -dpi "${DPI}" +extension
 echo "Waiting for X socket"
 until [ -S "/tmp/.X11-unix/X${DISPLAY/:/}" ]; do sleep 1; done
 echo "X socket is ready"
-
-#selkies-gstreamer-resize "${SIZEW}x${SIZEH}"
 
 if [ "$NOVNC_ENABLE" = "true" ]; then
   if [ -n "$NOVNC_VIEWPASS" ]; then export NOVNC_VIEWONLY="-viewpasswd ${NOVNC_VIEWPASS}"; else unset NOVNC_VIEWONLY; fi
@@ -37,13 +32,6 @@ else
   xfce4-session &
 fi
 
-# Fix selkies-gstreamer keyboard mapping
-#if [ "$NOVNC_ENABLE" != "true" ]; then
-#  sudo xmodmap -e "keycode 94 shift = less less"
-#fi
-
 echo "Session Running."
-#read
 
 "$@"
-
