@@ -6,7 +6,7 @@ We provide pre-built docker image for easier installation. Our docker image also
 docker pull minedojo/minedojo:latest
 ```
 
-For detailed usegae please see [related section](http://docs.minedojo.org/sections/getting_started/install.html#docker-image) on our doc page.
+For detailed usage please see [related section](http://docs.minedojo.org/sections/getting_started/install.html#docker-image) on our doc page.
 
 ## Acknowledgement
 
