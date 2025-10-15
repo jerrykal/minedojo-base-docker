@@ -260,26 +260,12 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     ln -s /opt/noVNC/vnc.html /opt/noVNC/index.html && \
     git clone https://github.com/novnc/websockify /opt/noVNC/utils/websockify
 
-# Add custom packages below this comment
-# python 3.9 conda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py39_4.10.3-Linux-x86_64.sh -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
-    rm ~/miniconda.sh && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc
-
-ENV PATH /opt/conda/bin:$PATH
-
 # java jdk 1.8
 RUN apt update -y && apt install -y software-properties-common && \
     add-apt-repository ppa:openjdk-r/ppa && apt update -y && \
     apt install -y openjdk-8-jdk && \
     rm -rf /var/lib/apt/lists/* && \
     update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
-
-# install MineDojo
-RUN pip3 install --no-cache-dir git+https://github.com/MineDojo/MineDojo
 
 # Create user with password ${PASSWD}
 RUN apt-get update && apt-get install --no-install-recommends -y \
