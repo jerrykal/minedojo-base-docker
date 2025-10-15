@@ -1,13 +1,5 @@
-# MineDojo Docker Image
+# MineDojo Base Docker Image
 
-We provide pre-built docker image for easier installation. Our docker image also supports GPU-accelerated simulation on headless machines such as training nodes on a server. To pull the image, simply run
+This is the base Docker image for MineDojo projects, built on top of [MineDojo/egl-docker](https://github.com/MineDojo/egl-docker).
 
-```bash
-docker pull minedojo/minedojo:latest
-```
-
-For detailed usage please see [related section](http://docs.minedojo.org/sections/getting_started/install.html#docker-image) on our doc page.
-
-## Acknowledgement
-
-We build upon this docker image from this [repo](https://github.com/ehfd/docker-nvidia-egl-desktop). We sincerely thank [Xiaojian Ma](http://web.cs.ucla.edu/~xm/) for discussion and assistance when we devloped this docker image.
+It installs all system-level dependencies required by MineDojo, while leaving project-level dependencies (such as conda environments and the MineDojo Python package) to be installed separately within each project.
